@@ -16,17 +16,24 @@ public class PageParser {
     public static final String TABLE_HEADERS = "Info Course Mode Language Duration Points";
 
     public static List<WebElement> primaryNodes(WebDriver webDriver) {
-        return webDriver.findElements(By.className(PRIMARY_NODE)).stream().filter(x -> isCourseTable(x)).collect(Collectors.toList());
+
+        List<WebElement> result = new ArrayList<>();
+
+        for(WebElement element: webDriver.findElements(By.className(PRIMARY_NODE))) {
+
+            if(!isCourseTable(element)) result.add(element);
+
+        }
+
+        return result;
+    }
+
+    private static boolean isCourseTable(WebElement x) {
+        return StringUtils.startsWith(x.getText(), TABLE_HEADERS);
     }
 
     public static void toggleExpander(WebElement webElement) {
         webElement.findElement(By.className("tvExpander")).click();
-    }
-
-    private static boolean isCourseTable(WebElement x) {
-        return StringUtils.startsWith(x.
-                findElement(By.className("nodeText"))
-                .getText(), TABLE_HEADERS);
     }
 
 }
