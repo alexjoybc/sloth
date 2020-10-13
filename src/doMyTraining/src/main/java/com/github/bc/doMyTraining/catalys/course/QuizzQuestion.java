@@ -8,14 +8,16 @@ import java.util.List;
 
 public class QuizzQuestion {
 
-    public String quizzId;
-    public String question;
-    public List<String> badAnswers = new ArrayList<>();
-    public String answer;
+    private String quizzId;
+    private String question;
+    private List<String> badAnswers = new ArrayList<>();
+    private String answer;
+    private int hashcode;
 
     public QuizzQuestion(String quizzId, String question) {
         this.question = question;
         this.quizzId = quizzId;
+        this.hashcode = question.hashCode();
     }
 
     @JsonCreator
@@ -43,6 +45,10 @@ public class QuizzQuestion {
 
     public String getAnswer() {
         return answer;
+    }
+
+    public int getHashcode() {
+        return this.hashcode;
     }
 
     public void setAnswer(String answer) {
