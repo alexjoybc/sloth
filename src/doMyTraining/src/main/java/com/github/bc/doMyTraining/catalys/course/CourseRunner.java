@@ -2,19 +2,20 @@ package com.github.bc.doMyTraining.catalys.course;
 
 import com.github.bc.doMyTraining.Training;
 import org.openqa.selenium.WebDriver;
+import org.sikuli.script.Match;
 import org.sikuli.script.Pattern;
 import org.sikuli.script.Region;
 import org.sikuli.script.Screen;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ResourceUtils;
 
-import java.io.File;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 
 @Component
 public class CourseRunner implements CommandLineRunner {
@@ -35,25 +36,12 @@ public class CourseRunner implements CommandLineRunner {
 
         driver.get("https://catalys.portal.nttdataservices.com/mod/scorm/player.php?a=2075&currentorg=&scoid=4251&display=popup&mode=normal&newattempt=on");
 
-        Resource buttonNext = new ClassPathResource("buttonNext.png");
-        File buttonNextPng = buttonNext.getFile();
-        Pattern buttonNextPattern = new Pattern(buttonNextPng.getAbsolutePath());
-
-        Resource buttonResume = new ClassPathResource("buttonResumeYes.png");
-        File buttonResumePng = buttonResume.getFile();
-        Pattern buttonResumePattern = new Pattern(buttonResumePng.getAbsolutePath());
-
-        Resource buttonResumeNo = new ClassPathResource("buttonResumeNo.png");
-        File buttonResumeNoPng = buttonResumeNo.getFile();
-        Pattern buttonResumeNoPattern = new Pattern(buttonResumeNoPng.getAbsolutePath());
-
-        Resource progressBarComplete = new ClassPathResource("progressBarComplete.png");
-        File progressBarCompletePng = progressBarComplete.getFile();
-        Pattern progressBarCompletePattern = new Pattern(progressBarCompletePng.getAbsolutePath());
-
-        Resource radioButtonNotSelect = new ClassPathResource("radioButtonNotSelect.png");
-        File radioButtonNotSelectPng = radioButtonNotSelect.getFile();
-        Pattern radioButtonNotSelectPattern = new Pattern(radioButtonNotSelectPng.getAbsolutePath());
+        Pattern buttonNextPattern = PatternBuilder.buttonNext();
+        Pattern buttonResumePattern = PatternBuilder.buttonPopUpYes();
+        Pattern buttonResumeNoPattern = PatternBuilder.buttonPopUpNo();
+        Pattern progressBarCompletePattern = PatternBuilder.progressBarComplete();
+        Pattern radioButtonNotSelectPattern = PatternBuilder.radioButtonNotSet();
+        Pattern buttonSubmitPattern = PatternBuilder.buttonSubmit();
 
         Screen s = new Screen();
 
@@ -61,34 +49,57 @@ public class CourseRunner implements CommandLineRunner {
 
         logger.info("score {}", s.exists(buttonResumeNoPattern).getScore());
 
-        if(s.exists(buttonResumeNoPattern) != null && s.exists(buttonResumeNoPattern).getScore() > 0.9) {
+        if (s.exists(buttonResumeNoPattern) != null && s.exists(buttonResumeNoPattern).getScore() > 0.9) {
 
             s.click(buttonResumeNoPattern);
+
         }
 
         logger.info("resuming course");
 
-
-
         logger.info("progress complete");
 
-        for(int i = 0; i < 20; i++) {
+        for (int i = 0; i < 20; i++) {
 
-            if(s.exists(radioButtonNotSelectPattern, 2) != null && s.exists(radioButtonNotSelectPattern, 2).getScore() > 0.9) {
+            if (s.exists(radioButtonNotSelectPattern, 2) != null && s.exists(radioButtonNotSelectPattern, 2).getScore() > 0.9) {
 
-                s.findAll(radioButtonNotSelectPattern).forEachRemaining(match -> {
+                // capture question
 
-                    Region text = new Region(match.x, match.y, match.w + 300, match.h);
+                Match matchLogo = s.find(PatternBuilder.logoNtt());
+                Match matchLogoText = s.find(PatternBuilder.LogoNttText());
 
-                    logger.info("test for this one: {}", text.text());
+                List<Match> answerList = new ArrayList<>();
 
-                });
+                s.findAll(radioButtonNotSelectPattern).forEachRemaining(match -> answerList.add(match));
 
+                Optional<Match> upperAnswer = answerList
+                        .stream()
+                        .sorted(Comparator.comparingInt(match -> match.getTopLeft().getX()))
+                        .findFirst();
+
+                if (upperAnswer.isPresent()) {
+
+                    Region question = new Region(matchLogo.getX(), matchLogo.getBottomLeft().getY(), matchLogoText.getX() - matchLogo.getX() + matchLogoText.getW(), upperAnswer.get().getY() - matchLogo.getBottomLeft().getY());
+
+                    question.highlight();
+
+                    logger.info(question.text());
+
+                    s.findAll(radioButtonNotSelectPattern).forEachRemaining(match -> {
+
+                        Region text = new Region(match.x, match.y, match.w + 300, match.h);
+
+                        logger.info("test for this one: {}", text.text());
+
+                    });
+
+                }
 
             } else {
 
-                s.wait(progressBarCompletePattern.similar(0.9), 100);
-                s.click(buttonNextPattern);
+                //       s.wait(progressBarCompletePattern.similar(0.9), 100);
+                s.click(s.findBest(buttonNextPattern));
+                s.mouseMove(20, 0);
 
             }
         }

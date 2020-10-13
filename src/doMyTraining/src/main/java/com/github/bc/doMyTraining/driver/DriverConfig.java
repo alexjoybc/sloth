@@ -1,5 +1,6 @@
 package com.github.bc.doMyTraining.driver;
 
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
@@ -16,13 +17,12 @@ public class DriverConfig {
 
     @Bean
     public WebDriver webDriver() {
-
         System.setProperty(WEBDRIVER_IE_DRIVER, IE_DRIVER_PATH);
         WebDriver driver = new InternetExplorerDriver();
-        driver.manage().window().maximize();
+        Dimension dimension = new Dimension(1200, 800);
+        driver.manage().window().setSize(dimension);
         return driver;
     }
-
 
 
 }
