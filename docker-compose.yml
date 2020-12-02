@@ -1,0 +1,16 @@
+version: "3"
+services:
+  sloth-js:
+    build:
+      context: ./src/sloth-js
+    ports:
+      - "3000:80"
+    networks: 
+      - sloth-net
+
+volumes:
+  metabase:
+
+networks: 
+  sloth-net:
+    driver: bridge
