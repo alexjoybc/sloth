@@ -2,6 +2,7 @@ import logo from './logo.svg';
 import './App.css';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'github-markdown-css/github-markdown.css';
 
 import { Button } from 'react-bootstrap';
 
