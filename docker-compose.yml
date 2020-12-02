@@ -4,7 +4,7 @@ services:
     build:
       context: ./src/sloth-js
     ports:
-      - "3000:80"
+      - "8080:80"
     networks: 
       - sloth-net
 
