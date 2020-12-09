@@ -7,6 +7,14 @@ services:
       - "8080:80"
     networks: 
       - sloth-net
+  
+  sloth-api:
+    build:
+      context: ./src/sloth-backend/sloth-api
+    ports:
+      - "8081:8080"
+    networks:
+      - sloth-net
 
 volumes:
   metabase:
